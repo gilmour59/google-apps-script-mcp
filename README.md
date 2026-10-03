@@ -182,7 +182,7 @@ The following are intentionally deferred:
 
 Remote function execution needs an Apps Script **API executable deployment** and additional Google Cloud configuration. Script Properties are not directly exposed by the Apps Script project-management REST API, so they need a separate design.
 
-See [docs/ROADMAP.md](docs/ROADMAP.md).
+See [docs/TODO.md](docs/TODO.md) for the ordered development queue and [docs/ROADMAP.md](docs/ROADMAP.md) for the longer-term architecture plan.
 
 ## Development
 

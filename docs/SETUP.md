@@ -25,38 +25,77 @@ https://script.google.com/home/usersettings
 
 Turn **Google Apps Script API** on.
 
-## 3. Configure the OAuth consent screen
+This account-level switch is required before third-party applications can create or modify Apps Script projects through the API.
 
-In Google Cloud Console:
+## 3. Configure Google Auth Platform
 
-1. Open **Google Auth Platform** / **OAuth consent screen**.
-2. Configure the app name and support/contact details.
-3. If the app is in Testing mode, add your Google account as a test user.
+In the same Google Cloud project, open **Google Auth Platform**.
 
-The MCP currently requests:
+Configure these sections:
+
+### Branding
+
+Set an app name such as:
+
+```text
+Google Apps Script MCP
+```
+
+Add the required support/contact email addresses.
+
+### Audience
+
+For local development:
+
+- use **Internal** only if the Google Cloud project belongs to a Google Workspace organization and the MCP will only be used by users in that organization;
+- otherwise use **External** and keep the app in **Testing** while developing.
+
+If the app is External and in Testing, add the Google account you will use with the MCP as a **test user**.
+
+### Data Access
+
+Add only the scopes required by the current MVP:
 
 ```text
 https://www.googleapis.com/auth/script.projects
 https://www.googleapis.com/auth/script.deployments
-https://www.googleapis.com/auth/script.metrics
 ```
 
-These scopes allow project management, versions/deployments, and metrics access.
+These scopes cover Apps Script project content/version management and deployment management.
+
+Do not add future scopes until their features are implemented. For example, Phase 2 process monitoring may require `script.processes`, and project metrics would require `script.metrics`.
 
 ## 4. Create a Desktop OAuth client
 
-Create an OAuth client with application type:
+In **Google Auth Platform > Clients**, create a new OAuth client with application type:
 
 ```text
 Desktop app
 ```
 
-Download the JSON file.
+A name such as this is sufficient:
 
-By default, save it to:
+```text
+Google Apps Script MCP Local
+```
+
+Download the generated JSON file.
+
+Desktop OAuth clients support loopback redirects. The MCP opens a temporary listener on `127.0.0.1` with a random local port, so you do not manually configure a fixed redirect URI for this client.
+
+By default, save the downloaded JSON to:
 
 ```text
 ~/.config/google-apps-script-mcp/oauth-client.json
+```
+
+On macOS/Linux:
+
+```bash
+mkdir -p ~/.config/google-apps-script-mcp
+mv ~/Downloads/<downloaded-client-file>.json \
+  ~/.config/google-apps-script-mcp/oauth-client.json
+chmod 600 ~/.config/google-apps-script-mcp/oauth-client.json
 ```
 
 You may instead set:
@@ -64,6 +103,10 @@ You may instead set:
 ```bash
 export GOOGLE_OAUTH_CLIENT_FILE=/absolute/path/oauth-client.json
 ```
+
+The downloaded file should contain an `installed` object with a `client_id` and `client_secret`.
+
+Do not commit this file.
 
 ## 5. Install the MCP
 
@@ -205,10 +248,14 @@ Only use replacement mode when the local directory represents the complete Apps 
 Check:
 
 ```bash
-ls ~/.config/google-apps-script-mcp/oauth-client.json
+ls -l ~/.config/google-apps-script-mcp/oauth-client.json
 ```
 
 or set `GOOGLE_OAUTH_CLIENT_FILE`.
+
+### OAuth client file has the wrong application type
+
+For this MCP, create a **Desktop app** OAuth client. The downloaded JSON should normally contain an `installed` object.
 
 ### No refresh token
 
@@ -226,6 +273,10 @@ Enable it both:
 
 - in the Google Cloud project;
 - in your Apps Script user settings.
+
+### App is in Testing but account cannot authorize
+
+In **Google Auth Platform > Audience**, add the Google account being used by the MCP as a test user.
 
 ### Multiple Google accounts
 
